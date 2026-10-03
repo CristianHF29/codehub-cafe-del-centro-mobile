@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colores, espacio, fuentes } from "../constants/theme";
+import { formatearPrecio } from "../utils/formato";
 import Tarjeta from "./tarjeta";
 
 type Props = {
@@ -13,7 +14,7 @@ export default function TarjetaProducto({ nombre, descripcion, precio }: Props) 
         <Tarjeta>
             <View style={styles.fila}>
                 <Text style={styles.nombre}>{nombre}</Text>
-                <Text style={styles.precio}>${precio.toFixed(2)}</Text>
+                <Text style={styles.precio}>Desde {formatearPrecio(precio)}</Text>
             </View>
             <Text style={styles.descripcion}>{descripcion}</Text>
         </Tarjeta>
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     },
     precio: {
         fontFamily: fuentes.negrita,
-        fontSize: 15,
+        fontSize: 14,
         color: colores.caramelo,
         marginLeft: espacio.sm,
     },

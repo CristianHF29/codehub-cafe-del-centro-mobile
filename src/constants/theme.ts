@@ -1,5 +1,6 @@
 export const colores = {
   fondo: "#FBF6EE",
+  fondoSuave: "#F3EADB",
   tarjeta: "#FFFFFF",
   cafe: "#3B2A1E",
   caramelo: "#C8873F",
@@ -7,6 +8,8 @@ export const colores = {
   textoSuave: "#7A6A5C",
   borde: "#E8DCCB",
   sobreOscuro: "#EADFCF",
+  exito: "#4F7A4A",
+  peligro: "#B4432F",
 };
 
 export const espacio = {
