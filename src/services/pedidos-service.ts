@@ -1,10 +1,12 @@
-import { ItemCarrito, Pedido, RespuestaPedido } from "../types";
+import { ItemCarrito, MetodoPago, Pedido, RespuestaPedido } from "../types";
 import { peticion } from "./api";
 
 type NuevoPedido = {
     usuarioId: number;
     items: ItemCarrito[];
     total: number;
+    metodoPago: MetodoPago;
+    referenciaPago?: string;
 };
 
 export function crearPedido(datos: NuevoPedido) {

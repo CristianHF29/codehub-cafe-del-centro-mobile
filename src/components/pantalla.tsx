@@ -7,13 +7,23 @@ type Props = {
     children: ReactNode;
     refrescando?: boolean;
     onRefrescar?: () => void;
+    sinPestanas?: boolean;
 };
 
-export default function Pantalla({ children, refrescando = false, onRefrescar }: Props) {
+export default function Pantalla({
+    children,
+    refrescando = false,
+    onRefrescar,
+    sinPestanas = false,
+}: Props) {
     return (
-        <SafeAreaView style={styles.fondo} edges={["top"]}>
+        <SafeAreaView
+            style={styles.fondo}
+            // Fuera de las pestañas también hay que dejar libre la barra de gestos
+            edges={sinPestanas ? ["top", "bottom"] : ["top"]}
+        >
             <ScrollView
-                contentContainerStyle={styles.contenido}
+                contentContainerStyle={[styles.contenido, sinPestanas && styles.contenidoExtra]}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
                 refreshControl={
@@ -42,5 +52,8 @@ const styles = StyleSheet.create({
         padding: espacio.md,
         paddingBottom: espacio.xl,
         gap: espacio.md,
+    },
+    contenidoExtra: {
+        paddingBottom: espacio.xl * 2,
     },
 });

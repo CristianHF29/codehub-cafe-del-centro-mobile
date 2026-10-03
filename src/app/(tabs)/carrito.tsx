@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import { useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import Boton from "../../components/boton";
 import Encabezado from "../../components/encabezado";
@@ -9,15 +8,10 @@ import Pantalla from "../../components/pantalla";
 import Tarjeta from "../../components/tarjeta";
 import { colores, espacio, fuentes } from "../../constants/theme";
 import { useCarrito } from "../../context/carrito-context";
-import { useSesion } from "../../context/sesion-context";
-import { mensajeError } from "../../services/api";
-import { crearPedido } from "../../services/pedidos-service";
 import { formatearPrecio } from "../../utils/formato";
 
 export default function Carrito() {
-  const { usuario, actualizarPuntos } = useSesion();
   const { items, total, cambiarCantidad, vaciar } = useCarrito();
-  const [enviando, setEnviando] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -28,30 +22,6 @@ export default function Carrito() {
         accion={{ titulo: "Ir al menú", onPress: () => router.push("/menu") }}
       />
     );
-  }
-
-  async function confirmar() {
-    if (!usuario) return;
-
-    setEnviando(true);
-    try {
-      const respuesta = await crearPedido({
-        usuarioId: usuario.id,
-        items,
-        total: Number(total.toFixed(2)),
-      });
-
-      actualizarPuntos(respuesta.puntosTotales);
-      vaciar();
-      Alert.alert(
-        "¡Pedido confirmado!",
-        `Ganaste ${respuesta.puntosGanados} puntos. Puedes seguir el estado en tu cuenta.`
-      );
-    } catch (e) {
-      Alert.alert("No se pudo enviar el pedido", mensajeError(e));
-    } finally {
-      setEnviando(false);
-    }
   }
 
   function preguntarVaciar() {
@@ -81,7 +51,7 @@ export default function Carrito() {
         <Text style={styles.puntos}>Con este pedido ganas {Math.floor(total)} puntos</Text>
       </Tarjeta>
 
-      <Boton titulo="Confirmar pedido" onPress={confirmar} cargando={enviando} />
+      <Boton titulo="Continuar al pago" onPress={() => router.push("/pago")} />
       <Boton titulo="Vaciar carrito" variante="secundario" onPress={preguntarVaciar} />
     </Pantalla>
   );

@@ -12,6 +12,10 @@ const ESTADOS: Record<EstadoPedido, { texto: string; color: string }> = {
 
 export default function TarjetaPedido({ pedido }: { pedido: Pedido }) {
     const estado = ESTADOS[pedido.estado] ?? ESTADOS.pendiente;
+    const pago =
+        pedido.metodoPago === "tarjeta"
+            ? `Tarjeta •••• ${pedido.referenciaPago ?? ""}`
+            : "Efectivo";
 
     return (
         <Tarjeta style={styles.tarjeta}>
@@ -22,7 +26,9 @@ export default function TarjetaPedido({ pedido }: { pedido: Pedido }) {
                 </View>
             </View>
 
-            <Text style={styles.fecha}>{formatearFecha(pedido.fecha)}</Text>
+            <Text style={styles.detalle}>
+                {formatearFecha(pedido.fecha)} · {pago}
+            </Text>
 
             {pedido.items.map((item) => (
                 <Text key={`${item.id}-${item.tamano}`} style={styles.item}>
@@ -62,7 +68,7 @@ const styles = StyleSheet.create({
         fontFamily: fuentes.medio,
         fontSize: 11,
     },
-    fecha: {
+    detalle: {
         fontFamily: fuentes.texto,
         fontSize: 12,
         color: colores.textoSuave,

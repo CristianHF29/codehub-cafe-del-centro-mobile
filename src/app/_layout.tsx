@@ -47,6 +47,11 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login" options={{ animation: "fade" }} />
           <Stack.Screen name="registro" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="pago" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen
+            name="pedido-confirmado"
+            options={{ animation: "fade", gestureEnabled: false }}
+          />
         </Stack>
       </CarritoProvider>
     </SesionProvider>

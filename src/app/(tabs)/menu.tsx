@@ -1,20 +1,22 @@
 import { useMemo, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
-import Pantalla from "../../components/pantalla";
+import { StyleSheet, Text, View } from "react-native";
+import Aviso, { DatosAviso } from "../../components/aviso";
+import Cargando from "../../components/cargando";
 import Encabezado from "../../components/encabezado";
+import EstadoVacio from "../../components/estado-vacio";
+import HojaProducto from "../../components/hoja-producto";
+import Pantalla from "../../components/pantalla";
 import Tarjeta from "../../components/tarjeta";
 import TarjetaMenu from "../../components/tarjeta-menu";
-import HojaProducto from "../../components/hoja-producto";
-import Cargando from "../../components/cargando";
-import EstadoVacio from "../../components/estado-vacio";
-import { useProductos } from "../../hooks/use-productos";
-import { nombreCategoria } from "../../utils/formato";
-import { Producto } from "../../types";
 import { colores, espacio, fuentes } from "../../constants/theme";
+import { useProductos } from "../../hooks/use-productos";
+import { Producto } from "../../types";
+import { nombreCategoria } from "../../utils/formato";
 
 export default function Menu() {
   const { productos, cargando, error, recargar } = useProductos();
   const [seleccionado, setSeleccionado] = useState<Producto | null>(null);
+  const [aviso, setAviso] = useState<DatosAviso>(null);
 
   // Agrupa el catálogo por categoría para mostrarlo en secciones
   const secciones = useMemo(() => {
@@ -69,7 +71,13 @@ export default function Menu() {
         ))}
       </Pantalla>
 
-      <HojaProducto producto={seleccionado} onCerrar={() => setSeleccionado(null)} />
+      <HojaProducto
+        producto={seleccionado}
+        onCerrar={() => setSeleccionado(null)}
+        onAgregado={(texto) => setAviso({ texto, clave: Date.now() })}
+      />
+
+      <Aviso aviso={aviso} />
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,9 +15,10 @@ import FotoProducto from "./foto-producto";
 type Props = {
     producto: Producto | null;
     onCerrar: () => void;
+    onAgregado?: (texto: string) => void;
 };
 
-export default function HojaProducto({ producto, onCerrar }: Props) {
+export default function HojaProducto({ producto, onCerrar, onAgregado }: Props) {
     const { agregar } = useCarrito();
     const insets = useSafeAreaInsets();
     const [mostrado, setMostrado] = useState<Producto | null>(producto);
@@ -39,6 +41,8 @@ export default function HojaProducto({ producto, onCerrar }: Props) {
     function alAgregar() {
         if (!mostrado) return;
         agregar(mostrado, tamano, cantidad);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onAgregado?.(`${cantidad}× ${mostrado.nombre} (${tamano}) en tu carrito`);
         onCerrar();
     }
 

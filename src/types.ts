@@ -2,6 +2,8 @@ export const TAMANOS = ["16oz", "20oz", "24oz", "32oz"] as const;
 
 export type Tamano = (typeof TAMANOS)[number];
 
+export type MetodoPago = "efectivo" | "tarjeta";
+
 export type Usuario = {
     id: number;
     nombre: string;
@@ -37,6 +39,8 @@ export type Pedido = {
     total: number;
     estado: EstadoPedido;
     fecha: string;
+    metodoPago?: MetodoPago;
+    referenciaPago?: string | null;
 };
 
 export type RespuestaPedido = {
