@@ -1,56 +1,68 @@
-# Welcome to your Expo app 👋
+# Café del Centro · App móvil
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App para pedir café en **Café del Centro**, una cafetería de especialidad en el Centro Histórico de San Salvador. Desde el teléfono podés ver el menú, elegir el tamaño de tu bebida, pagar y acumular puntos.
 
-## Get started
+Es la versión móvil del proyecto de DPS941. La versión web, con el panel de administración, está en [codehub-cafe-del-centro-web](https://github.com/CristianHF29/codehub-cafe-del-centro-web).
 
-1. Install dependencies
+## Qué hace
 
-   ```bash
-   npm install
-   ```
+- Registro e inicio de sesión, con la sesión guardada en el teléfono
+- Menú por categorías, con fotos y tamaños de 16 a 32 oz
+- Carrito con cantidades y total
+- Pago en efectivo o con tarjeta (simulado, no cobra nada)
+- Puntos de fidelidad: 1 punto por cada dólar
+- Historial de pedidos que se actualiza solo cuando el admin cambia el estado desde la web
 
-2. Start the app
+## Tecnologías
 
-   ```bash
-   npx expo start
-   ```
+React Native, Expo, Expo Router y TypeScript. Los datos vienen de la API del proyecto web.
 
-In the output, you'll find options to open the app in a
+## Cómo correrlo
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Cloná el repo e instalá las dependencias:
 
 ```bash
-npm run reset-project
+   git clone https://github.com/CristianHF29/codehub-cafe-del-centro-mobile.git
+   cd codehub-cafe-del-centro-mobile
+   npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Revisá la URL de la API en `src/constants/config.ts`. Por defecto apunta a Vercel; si querés usar el proyecto web en local, poné la IP de tu compu, por ejemplo `http://192.168.0.10:3000/api`.
 
-### Other setup steps
+3. Arrancá la app:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+   npx expo start
+```
 
-## Learn more
+   Escaneá el QR con **Expo Go** o presioná `a` para abrirla en el emulador de Android.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Usuario de prueba
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Correo | Contraseña |
+|---|---|
+| cliente@correo.com | cliente123 |
 
-## Join the community
+La app es solo para clientes. Si entrás con una cuenta de administrador, te avisa que el panel está en la web.
 
-Join our community of developers creating universal apps.
+## Estructura
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+  app/          pantallas y navegación
+  components/   piezas reutilizables (botones, tarjetas, campos)
+  context/      sesión y carrito
+  services/     llamadas a la API
+  constants/    colores, fuentes y configuración
+  utils/        validaciones y formatos
+```
+
+## Equipo CodeHub
+
+| Integrante | Carnet |
+|---|---|
+| Rebeca Flores | FD253107 |
+| Cristian Arturo Hernández Flores | HF252375 |
+| Henry Chacón | CG253400 |
+| Giovanni Quijano | QS242538 |
+| Eduardo Amaya | AM210570 |
