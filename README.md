@@ -61,8 +61,5 @@ src/
 
 | Integrante | Carnet |
 |---|---|
-| Rebeca Sarai Flores De Tejada | FD253107 |
 | Cristian Arturo Hernández Flores | HF252375 |
-| Henry Beisson Chacón García | CG253400 |
-| Giovanni Manuel Quijano Sosa | QS242538 |
-| Eduardo Ezequiel Amaya Montano | AM210570 |
+
