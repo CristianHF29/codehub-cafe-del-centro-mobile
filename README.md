@@ -41,7 +41,7 @@ React Native, Expo, Expo Router y TypeScript. Los datos vienen de la API del pro
 
 | Correo | Contraseña |
 |---|---|
-| cliente@correo.com | cliente123 |
+| `cliente@correo.com` | cliente123 |
 
 La app es solo para clientes. Si entrás con una cuenta de administrador, te avisa que el panel está en la web.
 
@@ -52,6 +52,7 @@ src/
   app/          pantallas y navegación
   components/   piezas reutilizables (botones, tarjetas, campos)
   context/      sesión y carrito
+  hooks/        lógica compartida, como la carga de productos
   services/     llamadas a la API
   constants/    colores, fuentes y configuración
   utils/        validaciones y formatos
