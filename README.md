@@ -69,4 +69,3 @@ src/
 | Integrante | Carnet |
 |---|---|
 | Cristian Arturo Hernández Flores | HF252375 |
-
