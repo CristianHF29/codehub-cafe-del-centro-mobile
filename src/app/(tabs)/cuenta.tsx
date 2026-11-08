@@ -1,6 +1,5 @@
-import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 import Boton from "../../components/boton";
 import Encabezado from "../../components/encabezado";
 import Pantalla from "../../components/pantalla";
@@ -8,48 +7,28 @@ import Tarjeta from "../../components/tarjeta";
 import TarjetaPedido from "../../components/tarjeta-pedido";
 import { colores, espacio, fuentes, radio } from "../../constants/theme";
 import { useSesion } from "../../context/sesion-context";
-import { obtenerUsuario } from "../../services/auth-service";
-import { obtenerPedidosDeUsuario } from "../../services/pedidos-service";
+import { escucharPedidosDeUsuario } from "../../services/pedidos-service";
 import { Pedido } from "../../types";
 
-const INTERVALO_ACTUALIZACION = 5000;
-
 export default function Cuenta() {
-  const { usuario, cerrarSesion, actualizarPuntos } = useSesion();
+  const { usuario, cerrarSesion } = useSesion();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [cargando, setCargando] = useState(true);
   const id = usuario?.id;
 
-  const cargar = useCallback(
-    async (silencioso = false) => {
-      if (!id) return;
-      if (!silencioso) setCargando(true);
+  // Firestore avisa cada vez que cambia un pedido, sin volver a consultar
+  useEffect(() => {
+    if (!id) return;
 
-      const [lista, datos] = await Promise.allSettled([
-        obtenerPedidosDeUsuario(id),
-        obtenerUsuario(id),
-      ]);
-
-      if (lista.status === "fulfilled") {
-        setPedidos([...lista.value].sort((a, b) => b.fecha.localeCompare(a.fecha)));
-      }
-      if (datos.status === "fulfilled") {
-        actualizarPuntos(datos.value.puntos);
-      }
-
-      if (!silencioso) setCargando(false);
-    },
-    [id, actualizarPuntos]
-  );
-
-  // Mientras la pestaña está abierta, revisa cambios hechos desde el panel web
-  useFocusEffect(
-    useCallback(() => {
-      cargar();
-      const intervalo = setInterval(() => cargar(true), INTERVALO_ACTUALIZACION);
-      return () => clearInterval(intervalo);
-    }, [cargar])
-  );
+    return escucharPedidosDeUsuario(
+      id,
+      (lista) => {
+        setPedidos(lista);
+        setCargando(false);
+      },
+      () => setCargando(false)
+    );
+  }, [id]);
 
   function preguntarSalida() {
     Alert.alert("Cerrar sesión", "¿Quieres salir de tu cuenta?", [
@@ -61,7 +40,7 @@ export default function Cuenta() {
   if (!usuario) return null;
 
   return (
-    <Pantalla refrescando={cargando} onRefrescar={() => cargar()}>
+    <Pantalla>
       <Encabezado
         etiqueta="Mi cuenta"
         titulo={usuario.nombre ?? "Cliente"}
@@ -76,7 +55,9 @@ export default function Cuenta() {
 
       <Text style={styles.subtitulo}>Historial de pedidos</Text>
 
-      {pedidos.length === 0 && !cargando ? (
+      {cargando ? (
+        <ActivityIndicator color={colores.caramelo} style={styles.cargando} />
+      ) : pedidos.length === 0 ? (
         <Tarjeta>
           <Text style={styles.vacio}>Aún no has hecho pedidos.</Text>
         </Tarjeta>
@@ -118,6 +99,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colores.texto,
     marginTop: espacio.sm,
+  },
+  cargando: {
+    marginVertical: espacio.lg,
   },
   vacio: {
     fontFamily: fuentes.texto,

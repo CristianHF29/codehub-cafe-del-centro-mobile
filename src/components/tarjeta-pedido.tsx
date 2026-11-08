@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colores, espacio, fuentes, radio } from "../constants/theme";
 import { EstadoPedido, Pedido } from "../types";
-import { formatearFecha, formatearPrecio } from "../utils/formato";
+import { codigoPedido, formatearFecha, formatearPrecio } from "../utils/formato";
 import Tarjeta from "./tarjeta";
 
 const ESTADOS: Record<EstadoPedido, { texto: string; color: string }> = {
@@ -20,7 +20,7 @@ export default function TarjetaPedido({ pedido }: { pedido: Pedido }) {
     return (
         <Tarjeta style={styles.tarjeta}>
             <View style={styles.encabezado}>
-                <Text style={styles.numero}>Pedido #{pedido.id}</Text>
+                <Text style={styles.numero}>Pedido #{codigoPedido(pedido.id)}</Text>
                 <View style={[styles.estado, { borderColor: estado.color }]}>
                     <Text style={[styles.estadoTexto, { color: estado.color }]}>{estado.texto}</Text>
                 </View>

@@ -5,7 +5,7 @@ import { Animated, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Boton from "../components/boton";
 import { colores, espacio, fuentes, radio } from "../constants/theme";
-import { formatearPrecio } from "../utils/formato";
+import { codigoPedido, formatearPrecio } from "../utils/formato";
 
 type Parametros = {
     id: string;
@@ -48,7 +48,7 @@ export default function PedidoConfirmado() {
                 </Animated.View>
 
                 <Animated.View style={[styles.textos, entrada]}>
-                    <Text style={styles.etiqueta}>PEDIDO #{id}</Text>
+                    <Text style={styles.etiqueta}>PEDIDO #{codigoPedido(id)}</Text>
                     <Text style={styles.titulo}>¡Gracias por tu pedido!</Text>
                     <Text style={styles.texto}>
                         {metodo === "tarjeta" ? "Tu pago fue aprobado." : "Pagas en caja al recogerlo."} Te

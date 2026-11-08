@@ -13,17 +13,18 @@ export type Usuario = {
 };
 
 export type Producto = {
-  id: number;
+  id: string;
   nombre: string;
   descripcion: string;
   categoria: string;
   imagen?: string;
   disponible?: boolean;
+  orden?: number;
   precios: Record<Tamano, number>;
 };
 
 export type ItemCarrito = {
-  id: number;
+  id: string;
   nombre: string;
   tamano: Tamano;
   precio: number;
@@ -33,7 +34,7 @@ export type ItemCarrito = {
 export type EstadoPedido = "pendiente" | "listo" | "entregado";
 
 export type Pedido = {
-  id: number;
+  id: string;
   usuarioId: string;
   items: ItemCarrito[];
   total: number;

@@ -1,1 +1,0 @@
-export const API_URL = "https://codehub-cafe-del-centro-web.vercel.app/api";
