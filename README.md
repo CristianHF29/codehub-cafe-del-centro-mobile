@@ -8,7 +8,7 @@ Es la versión móvil del proyecto de DPS941. La versión web, con el panel de a
 
 - **Video de demostración:** [Ver video](https://udbedu-my.sharepoint.com/:v:/g/personal/hf252375_alumno_udb_edu_sv/IQCtN-2-UVxfSaUael5wPyzDAZqpA-RhDCI1ZZ76po8zh-s?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=91Y5vg)
 - **Documento:** [Investigación sobre React Native y Figma aplicados al proyecto (PDF)](Etapa3-CodeHub-Movil.pdf)
-- **Código fuente:** carpeta [`src`](src)
+- **Código fuente entregado:** [ver versión del Foro 1](https://github.com/CristianHF29/codehub-cafe-del-centro-mobile/tree/foro-1)
 
 ## Qué hace
 
