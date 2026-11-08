@@ -1,14 +1,15 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { auth, db } from "../services/firebase";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import {
   asegurarPerfil,
-  cerrarSesion as salirDeFirebase,
   iniciarSesion as entrarConCorreo,
+  iniciarSesionConGoogle,
   obtenerUsuario,
   registrar,
+  cerrarSesion as salirDeFirebase,
 } from "../services/auth-service";
+import { auth, db } from "../services/firebase";
 import { Usuario } from "../types";
 
 type DatosRegistro = {
@@ -21,6 +22,7 @@ type SesionValor = {
   usuario: Usuario | null;
   cargando: boolean;
   iniciarSesion: (email: string, password: string) => Promise<void>;
+  iniciarConGoogle: () => Promise<void>;
   registrarse: (datos: DatosRegistro) => Promise<void>;
   cerrarSesion: () => void;
   actualizarPuntos: (puntos: number) => void;
@@ -82,14 +84,23 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  async function iniciarSesion(email: string, password: string) {
-    const { user } = await entrarConCorreo(email.trim().toLowerCase(), password);
-    const perfil = await obtenerUsuario(user.uid).catch(() => null);
+  async function rechazarAdmin(uid: string) {
+    const perfil = await obtenerUsuario(uid).catch(() => null);
 
     if (perfil?.rol === "admin") {
       await salirDeFirebase();
       throw new Error(MENSAJE_ADMIN);
     }
+  }
+
+  async function iniciarSesion(email: string, password: string) {
+    const { user } = await entrarConCorreo(email.trim().toLowerCase(), password);
+    await rechazarAdmin(user.uid);
+  }
+
+  async function iniciarConGoogle() {
+    const user = await iniciarSesionConGoogle();
+    if (user) await rechazarAdmin(user.uid);
   }
 
   async function registrarse({ nombre, email, password }: DatosRegistro) {
@@ -110,7 +121,15 @@ export function SesionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SesionContext.Provider
-      value={{ usuario, cargando, iniciarSesion, registrarse, cerrarSesion, actualizarPuntos }}
+      value={{
+        usuario,
+        cargando,
+        iniciarSesion,
+        iniciarConGoogle,
+        registrarse,
+        cerrarSesion,
+        actualizarPuntos,
+      }}
     >
       {children}
     </SesionContext.Provider>

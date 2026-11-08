@@ -1,13 +1,25 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
   User,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { auth, db } from "./firebase";
 import { Usuario } from "../types";
+
+GoogleSignin.configure({
+  webClientId: "470528255428-9ohpgd5k8hl8aap45ddh8rgs0tt72r3f.apps.googleusercontent.com",
+});
 
 type DatosRegistro = {
   nombre: string;
@@ -35,8 +47,39 @@ export function iniciarSesion(email: string, password: string) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
-export function cerrarSesion() {
-  return signOut(auth);
+// Devuelve null si la persona cierra la ventana de Google sin elegir cuenta
+export async function iniciarSesionConGoogle() {
+  try {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    const respuesta = await GoogleSignin.signIn();
+    if (!isSuccessResponse(respuesta)) return null;
+
+    const { idToken } = respuesta.data;
+    if (!idToken) throw new Error("Google no devolvió la información de la cuenta");
+
+    const credencial = GoogleAuthProvider.credential(idToken);
+    const { user } = await signInWithCredential(auth, credencial);
+    await asegurarPerfil(user);
+    return user;
+  } catch (error) {
+    if (isErrorWithCode(error)) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) return null;
+      if (error.code === statusCodes.IN_PROGRESS) return null;
+      if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        throw new Error("Este dispositivo no tiene Google Play Services");
+      }
+      if (error.code === "DEVELOPER_ERROR" || error.code === "10") {
+        throw new Error("Falta registrar la huella SHA-1 de la app en Firebase");
+      }
+    }
+    throw error;
+  }
+}
+
+export async function cerrarSesion() {
+  // Así la próxima vez Google vuelve a preguntar qué cuenta usar
+  await GoogleSignin.signOut().catch(() => {});
+  await signOut(auth);
 }
 
 // Crea el perfil si el usuario todavía no tiene uno en Firestore
