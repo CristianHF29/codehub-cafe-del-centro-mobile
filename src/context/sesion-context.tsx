@@ -1,89 +1,124 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { login, registrar } from "../services/auth-service";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
+import {
+  asegurarPerfil,
+  cerrarSesion as salirDeFirebase,
+  iniciarSesion as entrarConCorreo,
+  obtenerUsuario,
+  registrar,
+} from "../services/auth-service";
 import { Usuario } from "../types";
 
-const CLAVE_SESION = "cafe-del-centro:sesion";
-
 type DatosRegistro = {
-    nombre: string;
-    email: string;
-    password: string;
+  nombre: string;
+  email: string;
+  password: string;
 };
 
 type SesionValor = {
-    usuario: Usuario | null;
-    cargando: boolean;
-    iniciarSesion: (email: string, password: string) => Promise<void>;
-    registrarse: (datos: DatosRegistro) => Promise<void>;
-    cerrarSesion: () => void;
-    actualizarPuntos: (puntos: number) => void;
+  usuario: Usuario | null;
+  cargando: boolean;
+  iniciarSesion: (email: string, password: string) => Promise<void>;
+  registrarse: (datos: DatosRegistro) => Promise<void>;
+  cerrarSesion: () => void;
+  actualizarPuntos: (puntos: number) => void;
 };
 
 const SesionContext = createContext<SesionValor | null>(null);
 
+const MENSAJE_ADMIN =
+  "Esta app es para clientes. El panel de administración está en la versión web.";
+
 export function SesionProvider({ children }: { children: ReactNode }) {
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
-    const [cargando, setCargando] = useState(true);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [cargando, setCargando] = useState(true);
 
-    // Recupera la sesión guardada al abrir la app
-    useEffect(() => {
-        AsyncStorage.getItem(CLAVE_SESION)
-            .then((guardado) => {
-                if (guardado) setUsuario(JSON.parse(guardado));
-            })
-            .finally(() => setCargando(false));
-    }, []);
+  useEffect(() => {
+    let dejarDeEscucharPerfil: (() => void) | undefined;
 
-    // Cualquier cambio del usuario queda guardado en el dispositivo
-    useEffect(() => {
-        if (cargando) return;
+    const dejarDeEscucharAuth = onAuthStateChanged(auth, (user) => {
+      dejarDeEscucharPerfil?.();
+      dejarDeEscucharPerfil = undefined;
 
-        if (usuario) {
-            AsyncStorage.setItem(CLAVE_SESION, JSON.stringify(usuario));
-        } else {
-            AsyncStorage.removeItem(CLAVE_SESION);
-        }
-    }, [usuario, cargando]);
-
-    async function iniciarSesion(email: string, password: string) {
-        const datos = await login(email.trim().toLowerCase(), password);
-
-        if (datos.rol === "admin") {
-            throw new Error("Esta app es para clientes. El panel de administración está en la versión web.");
-        }
-
-        setUsuario(datos);
-    }
-
-    async function registrarse({ nombre, email, password }: DatosRegistro) {
-        await registrar({
-            nombre: nombre.trim(),
-            email: email.trim().toLowerCase(),
-            password,
-        });
-        await iniciarSesion(email, password);
-    }
-
-    function cerrarSesion() {
+      if (!user) {
         setUsuario(null);
+        setCargando(false);
+        return;
+      }
+
+      // El perfil se escucha en tiempo real, así los puntos se actualizan solos
+      dejarDeEscucharPerfil = onSnapshot(
+        doc(db, "usuarios", user.uid),
+        (perfil) => {
+          if (!perfil.exists()) {
+            asegurarPerfil(user);
+            return;
+          }
+
+          const datos = perfil.data();
+          if (datos.rol === "admin") {
+            salirDeFirebase();
+            return;
+          }
+
+          setUsuario({
+            id: user.uid,
+            nombre: datos.nombre,
+            email: datos.email,
+            rol: datos.rol,
+            puntos: datos.puntos ?? 0,
+          });
+          setCargando(false);
+        },
+        () => setCargando(false)
+      );
+    });
+
+    return () => {
+      dejarDeEscucharPerfil?.();
+      dejarDeEscucharAuth();
+    };
+  }, []);
+
+  async function iniciarSesion(email: string, password: string) {
+    const { user } = await entrarConCorreo(email.trim().toLowerCase(), password);
+    const perfil = await obtenerUsuario(user.uid).catch(() => null);
+
+    if (perfil?.rol === "admin") {
+      await salirDeFirebase();
+      throw new Error(MENSAJE_ADMIN);
     }
+  }
 
-    const actualizarPuntos = useCallback((puntos: number) => {
-        setUsuario((actual) => (actual ? { ...actual, puntos } : actual));
-    }, []);
+  async function registrarse({ nombre, email, password }: DatosRegistro) {
+    await registrar({
+      nombre: nombre.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+    });
+  }
 
-    return (
-        <SesionContext.Provider
-            value={{ usuario, cargando, iniciarSesion, registrarse, cerrarSesion, actualizarPuntos }}
-        >
-            {children}
-        </SesionContext.Provider>
-    );
+  function cerrarSesion() {
+    salirDeFirebase();
+  }
+
+  const actualizarPuntos = useCallback((puntos: number) => {
+    setUsuario((actual) => (actual ? { ...actual, puntos } : actual));
+  }, []);
+
+  return (
+    <SesionContext.Provider
+      value={{ usuario, cargando, iniciarSesion, registrarse, cerrarSesion, actualizarPuntos }}
+    >
+      {children}
+    </SesionContext.Provider>
+  );
 }
 
 export function useSesion() {
-    const contexto = useContext(SesionContext);
-    if (!contexto) throw new Error("useSesion debe usarse dentro de SesionProvider");
-    return contexto;
+  const contexto = useContext(SesionContext);
+  if (!contexto) throw new Error("useSesion debe usarse dentro de SesionProvider");
+  return contexto;
 }

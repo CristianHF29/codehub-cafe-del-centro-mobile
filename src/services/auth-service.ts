@@ -1,26 +1,65 @@
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  User,
+} from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 import { Usuario } from "../types";
-import { peticion } from "./api";
 
 type DatosRegistro = {
-    nombre: string;
-    email: string;
-    password: string;
+  nombre: string;
+  email: string;
+  password: string;
 };
 
-export function login(email: string, password: string) {
-    return peticion<Usuario>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-    });
+function perfilInicial(nombre: string, email: string) {
+  return {
+    nombre,
+    email,
+    rol: "cliente",
+    puntos: 0,
+    creado: serverTimestamp(),
+  };
 }
 
-export function registrar(datos: DatosRegistro) {
-    return peticion<unknown>("/auth/registro", {
-        method: "POST",
-        body: JSON.stringify(datos),
-    });
+export async function registrar({ nombre, email, password }: DatosRegistro) {
+  const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  await updateProfile(user, { displayName: nombre });
+  await setDoc(doc(db, "usuarios", user.uid), perfilInicial(nombre, email));
 }
 
-export function obtenerUsuario(id: number) {
-    return peticion<Usuario>(`/usuarios/${id}`);
+export function iniciarSesion(email: string, password: string) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export function cerrarSesion() {
+  return signOut(auth);
+}
+
+// Crea el perfil si el usuario todavía no tiene uno en Firestore
+export async function asegurarPerfil(user: User) {
+  const referencia = doc(db, "usuarios", user.uid);
+  const actual = await getDoc(referencia);
+
+  if (!actual.exists()) {
+    const nombre = user.displayName ?? user.email?.split("@")[0] ?? "Cliente";
+    await setDoc(referencia, perfilInicial(nombre, user.email ?? ""));
+  }
+}
+
+export async function obtenerUsuario(id: string): Promise<Usuario> {
+  const datos = await getDoc(doc(db, "usuarios", id));
+  if (!datos.exists()) throw new Error("No se encontró el perfil");
+
+  const perfil = datos.data();
+  return {
+    id,
+    nombre: perfil.nombre,
+    email: perfil.email,
+    rol: perfil.rol,
+    puntos: perfil.puntos ?? 0,
+  };
 }
